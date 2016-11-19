@@ -35,7 +35,7 @@ fn main() {
     fn index(_: &mut Request) -> IronResult<Response> {
         let mut html = String::with_capacity(4096);
 
-        render_response(String::from("Karten - Index"), &mut html);
+        render_response(String::from("Cardboard - Index"), &mut html);
 
         html_response(html)
     }
@@ -58,7 +58,7 @@ fn main() {
     }
 
     fn render_cards(output: &mut String) {
-        for card in fs::read_dir(".karten/cards").ok().unwrap().flat_map(|dir| dir.map(|e| e.path())) {
+        for card in fs::read_dir(".cardboard/cards").ok().unwrap().flat_map(|dir| dir.map(|e| e.path())) {
             let mut file = File::open(& card).ok().unwrap();
             let mut source = String::new();
 
