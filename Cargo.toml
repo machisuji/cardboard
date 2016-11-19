@@ -1,0 +1,17 @@
+[package]
+
+name = "cardboard"
+description = "A decentralized, kanban-style collaboration tool which lets you organize tasks into customizable cards based on plain, versioned text files."
+version = "0.1.0"
+authors = [ "Markus Kahl <machisuji@gmail.com>" ]
+license = "MIT"
+homepage = "https://github.com/machisuji/cardboard"
+readme = "README.md"
+
+[dependencies]
+hoedown = "5.0.0"
+iron = "0.4.0"
+hyper = "0.9.12"
+webbrowser = "0.1.3"
+router = "0.4.0"
+staticfile = "0.3.1"
