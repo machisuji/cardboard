@@ -87,11 +87,22 @@ fn main() {
         Ok(response)
     }
 
-    println!("Listening on port 9000 ...");
+    fn check_data_directory() -> bool {
+        let root = ".cardboard";
+        let cards = root.to_string() + "/cards";
 
-    if !webbrowser::open("http://localhost:9000/").is_ok() {
-        println!("Open http://localhost:9000 to view your project")
+        (fs::create_dir(root).is_ok() && fs::create_dir(& cards).is_ok()) || Path::new(& cards).exists()
     }
 
-    Iron::new(make_router()).http("localhost:9000").unwrap();
+    if check_data_directory() {
+        println!("Listening on port 9000 ...");
+
+        if !webbrowser::open("http://localhost:9000/").is_ok() {
+            println!("Open http://localhost:9000 to view your project")
+        }
+
+        Iron::new(make_router()).http("localhost:9000").unwrap();
+    } else {
+        println!("Failed to create data directory");
+    }
 }
