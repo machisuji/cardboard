@@ -3,3 +3,8 @@
   margin: 5px;
   padding: 5px;
 }
+
+.pure-menu {
+  height: 2em;
+  background-color: #ccab96;
+}
