@@ -15,7 +15,7 @@ use std::fs;
 use std::io::prelude::*;
 use std::fs::File;
 
-use std::collections::HashMap;
+use linked_hash_map::LinkedHashMap;
 
 use yaml_utils;
 use configuration;
@@ -99,7 +99,7 @@ fn load_cards() -> Vec<Card> {
         let mut file = File::open(& card).ok().unwrap();
         let mut source = String::new();
         let mut output = String::new();
-        let meta: HashMap<String, String>;
+        let meta: LinkedHashMap<String, String>;
 
         output.push_str("<div class=\"card\">");
 
@@ -133,9 +133,9 @@ fn load_cards() -> Vec<Card> {
             output.push_str(result.to_str().unwrap());
 
             meta = yaml_utils::read_yaml_object(meta_yaml, "meta")
-                .unwrap_or_else(|| HashMap::new());
+                .unwrap_or_else(|| LinkedHashMap::new());
         } else {
-            meta = HashMap::new();
+            meta = LinkedHashMap::new();
 
             output.push_str("Could not read: ");
             output.push_str(card.to_str().unwrap());

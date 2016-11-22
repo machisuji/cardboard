@@ -1,12 +1,12 @@
 extern crate yaml_rust;
 
-use std::collections::HashMap;
+use linked_hash_map::LinkedHashMap;
 
 use self::yaml_rust::YamlLoader;
 use self::yaml_rust::Yaml;
 
-pub fn read_map_from_string_to_string(doc: &yaml_rust::Yaml) -> HashMap<String, String> {
-    let mut result: HashMap<String, String> = HashMap::new();
+pub fn read_map_from_string_to_string(doc: &yaml_rust::Yaml) -> LinkedHashMap<String, String> {
+    let mut result: LinkedHashMap<String, String> = LinkedHashMap::new();
 
     match doc {
         &Yaml::Hash(ref hash) => {
@@ -26,7 +26,7 @@ pub fn read_map_from_string_to_string(doc: &yaml_rust::Yaml) -> HashMap<String, 
     result
 }
 
-pub fn read_yaml_object(yaml: String, key: &str) -> Option<HashMap<String, String>> {
+pub fn read_yaml_object(yaml: String, key: &str) -> Option<LinkedHashMap<String, String>> {
     if let Some(documents) = YamlLoader::load_from_str(& yaml).ok() {
         let doc: & Yaml = & documents[0];
 

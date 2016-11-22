@@ -5,7 +5,7 @@
 macro_rules! hash_from_string_to_string(
     { $($key:expr => $value:expr),+ } => {
         {
-            let mut m = ::std::collections::HashMap::new();
+            let mut m = ::linked_hash_map::LinkedHashMap::new();
             $(
                 m.insert(String::from($key), String::from($value));
             )+

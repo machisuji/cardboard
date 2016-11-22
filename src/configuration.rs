@@ -3,7 +3,7 @@ extern crate yaml_rust;
 use std::io::prelude::*;
 use std::fs::File;
 
-use std::collections::HashMap;
+use linked_hash_map::LinkedHashMap;
 
 use self::yaml_rust::YamlLoader;
 use self::yaml_rust::Yaml;
@@ -12,7 +12,7 @@ use yaml_utils;
 
 #[derive(Debug, Clone)]
 pub struct Config {
-    pub boards: HashMap<String, String>
+    pub boards: LinkedHashMap<String, String>
 }
 
 lazy_static! {
@@ -59,7 +59,7 @@ fn default_configuration() -> Config {
 }
 
 fn read_config(doc: & yaml_rust::Yaml) -> Config {
-    let mut boards = HashMap::new();
+    let mut boards = LinkedHashMap::new();
 
     match doc {
         &yaml_rust::Yaml::Hash(ref config) => {

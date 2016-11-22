@@ -5,6 +5,7 @@ extern crate webbrowser;
 extern crate router;
 extern crate staticfile;
 extern crate clap;
+extern crate linked_hash_map;
 
 #[macro_use]
 extern crate lazy_static;
