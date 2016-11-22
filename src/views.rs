@@ -23,6 +23,7 @@ use configuration::Config;
 
 #[derive(Debug, Clone)]
 pub struct Card {
+    title: String,
     board: String,
     tags: Vec<String>,
     html: String
@@ -43,6 +44,7 @@ fn render_response(title: String, output: &mut String) {
 
     output.push_str("<link rel=\"stylesheet\" href=\"http://yui.yahooapis.com/pure/0.6.0/pure-min.css\">");
     output.push_str("<link rel=\"stylesheet\" type=\"text/css\" href=\"main.css\">");
+    output.push_str("<script src=\"main.js\"></script>");
     output.push_str("</head><body>");
 
     render_menu(output);
@@ -75,7 +77,7 @@ fn render_cards(output: &mut String) {
     let cards: Vec<Card> = load_cards();
 
     for (board, label) in config.boards {
-        output.push_str("<div class=\"board pure-u-1-3\">");
+        output.push_str("<div class=\"board pure-u-1-3\" ondrop=\"drop(event)\" ondragover=\"allowDrop(event)\">");
         output.push_str("<h2 class=\"board-name\">");
         output.push_str(label.as_str());
         output.push_str("</h2>");
@@ -100,8 +102,7 @@ fn load_cards() -> Vec<Card> {
         let mut source = String::new();
         let mut output = String::new();
         let meta: LinkedHashMap<String, String>;
-
-        output.push_str("<div class=\"card\">");
+        let mut card_title = String::from("");
 
         if file.read_to_string(&mut source).is_ok() {
             let meta_yaml: String = source
@@ -122,6 +123,12 @@ fn load_cards() -> Vec<Card> {
                 )
                 .collect::<Vec<&str>>()
                 .join("\n");
+
+            card_title = markdown[1..].to_string();
+
+            output.push_str("<div id=\"card-");
+            output.push_str(cards.len().to_string().as_str());
+            output.push_str("\" class=\"card\" draggable=\"true\" ondragstart=\"drag(event)\">");
 
             markdown.push_str("\n\n");
             markdown.push_str(&markdown_body);
@@ -144,6 +151,7 @@ fn load_cards() -> Vec<Card> {
         output.push_str("</div>");
 
         let card = Card {
+            title: card_title,
             board: meta.get("board").unwrap_or(&String::from("unassigned")).to_string(),
             tags: meta
                 .get("tags")

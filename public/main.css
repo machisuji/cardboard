@@ -24,6 +24,7 @@ body {
 .board {
   border-radius: 5px;
   box-shadow: 0px 0px 3px #887766;
+  padding-bottom: 50px;
 }
 
 .board:nth-child(even) {
