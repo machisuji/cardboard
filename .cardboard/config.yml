@@ -1,0 +1,5 @@
+boards:
+  product_backlog: "Product Backlog"
+  sprint_backlog: "Sprint Backlog"
+  in_progress: "In Progress"
+  completed: "Completed"
