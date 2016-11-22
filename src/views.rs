@@ -15,6 +15,16 @@ use std::fs;
 use std::io::prelude::*;
 use std::fs::File;
 
+use configuration;
+use configuration::Config;
+
+#[derive(Debug, Clone)]
+pub struct Card {
+    board: String,
+    tags: Vec<String>,
+    html: String
+}
+
 pub fn index(_: &mut Request) -> IronResult<Response> {
     let mut html = String::with_capacity(4096);
 
@@ -52,28 +62,69 @@ fn render_menu(output: &mut String) {
 fn render_boards(output: &mut String) {
     output.push_str("<div class=\"pure-g\">");
 
-    output.push_str("<div class=\"pure-u-1-3\">");
     render_cards(output);
-    output.push_str("</div>");
-
-    output.push_str("<div class=\"pure-u-1-3\">foobar</div>");
-    output.push_str("<div class=\"pure-u-1-3\">foobar</div>");
-    output.push_str("<div class=\"pure-u-1-3\">foobar</div>");
-    output.push_str("<div class=\"pure-u-1-3\">foobar</div>");
-    output.push_str("<div class=\"pure-u-1-3\">foobar</div>");
 
     output.push_str("</div>");
 }
 
 fn render_cards(output: &mut String) {
+    let config: Config = configuration::config();
+    let cards: Vec<Card> = load_cards();
+
+    for (board, label) in config.boards {
+        output.push_str("<div class=\"pure-u-1-3\">");
+        output.push_str("<h2>");
+        output.push_str(label.as_str());
+        output.push_str("</h2>");
+
+        for i in 0..(cards.len() - 1) {
+            let ref card = cards[i];
+
+            if card.board == board {
+                output.push_str(card.html.as_str());
+            } else {
+                println!("{:?} does not match {:?}", card.board, board);
+            }
+        }
+
+        output.push_str("</div>");
+    }
+}
+
+fn load_cards() -> Vec<Card> {
+    let mut cards = Vec::new();
+
     for card in fs::read_dir(".cardboard/cards").ok().unwrap().flat_map(|dir| dir.map(|e| e.path())) {
         let mut file = File::open(& card).ok().unwrap();
         let mut source = String::new();
+        let mut output = String::new();
 
         output.push_str("<div class=\"card\">");
 
         if file.read_to_string(&mut source).is_ok() {
-            let doc = Markdown::new(&source);
+            let meta_yaml: String = source
+                .lines()
+                .skip_while(|line| !line.starts_with("meta:"))
+                .take_while(|line| line.starts_with("meta:") || line.starts_with(" "))
+                .collect::<Vec<&str>>()
+                .join("\n");
+
+            let mut markdown: String = source.lines().take(1).collect::<Vec<&str>>().join("\n");
+            let markdown_body: String = source
+                .lines()
+                .skip_while( |line|
+                    *line == markdown ||         // skip markdown title
+                    line.starts_with("meta:") || // skip meta yaml
+                    line.starts_with(" ") ||     // more meta yaml
+                    *line == ""                  // possible empty lines
+                )
+                .collect::<Vec<&str>>()
+                .join("\n");
+
+            markdown.push_str("\n\n");
+            markdown.push_str(&markdown_body);
+
+            let doc = Markdown::new(&markdown);
             let mut html = Html::new(Flags::empty(), 0);
             let result = html.render(&doc);
 
@@ -84,7 +135,12 @@ fn render_cards(output: &mut String) {
         }
 
         output.push_str("</div>");
+
+
+        cards.push(Card { board: String::from("foobar"), tags: vec![], html: output });
     }
+
+    cards
 }
 
 fn html_response(content: String) -> IronResult<Response> {

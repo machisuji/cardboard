@@ -8,28 +8,41 @@ use std::collections::HashMap;
 use self::yaml_rust::YamlLoader;
 use self::yaml_rust::Yaml;
 
-#[derive(Debug)]
+use yaml_utils;
+
+#[derive(Debug, Clone)]
 pub struct Config {
-    boards: Vec<String>
+    pub boards: HashMap<String, String>
 }
 
-pub fn load_config() -> Option<Config> {
+lazy_static! {
+    pub static ref CONFIG: Config = {
+        get_config()
+    };
+}
+
+pub fn config() -> Config {
+    let ref config: Config = *CONFIG;
+
+    config.clone()
+}
+
+fn get_config() -> Config {
+    let config: Option<Config> = load_config();
+
+    config.unwrap_or_else(|| default_configuration())
+}
+
+fn load_config() -> Option<Config> {
     if let Some(mut file) = File::open(".cardboard/config.yml").ok() {
         let mut yaml = String::new();
 
         if file.read_to_string(&mut yaml).is_ok() {
             if let Some(documents) = YamlLoader::load_from_str(& yaml).ok() {
-                let doc = &documents[0];
+                let doc: & Yaml = & documents[0];
+                let config: Config = read_config(doc);
 
-                println!("Calling read_boards");
-                let result = read_boards(doc);
-                println!("result: {:?}", result);
-
-                let config = Config {
-                    boards: vec![String::from("foo"), String::from("bar"), String::from("baz")]
-                };
-
-                return Some(config)
+                return Some(config);
             }
         }
     }
@@ -37,45 +50,33 @@ pub fn load_config() -> Option<Config> {
     None
 }
 
-fn read_boards(doc: &yaml_rust::Yaml) -> Vec<String> {
-    match doc {
-        &yaml_rust::Yaml::Hash(ref config) => {
-            println!("config: {:?}", config);
+fn default_configuration() -> Config {
+    println!("Using default configuration");
 
-            for (yaml_key, yaml_value) in config {
-                if let &yaml_rust::Yaml::String(ref key) = yaml_key {
-                    if key == "boards" {
-                        println!("boards: {:?}", read_map_from_string_to_string(yaml_value));
-                    }
-                }
-            }
-
-            vec![]
-        },
-        _ => {
-            println!("no match");
-            vec![]
-        }
+    Config {
+        boards: hash_from_string_to_string!{ "backlog" => "Backlog" }
     }
 }
 
-fn read_map_from_string_to_string(doc: &yaml_rust::Yaml) -> HashMap<&str, &str> {
-    let mut result = HashMap::new();
+fn read_config(doc: & yaml_rust::Yaml) -> Config {
+    let mut boards = HashMap::new();
 
     match doc {
-        &Yaml::Hash(ref hash) => {
-            for (yaml_key, yaml_value) in hash {
-                if let &Yaml::String(ref key) = yaml_key {
-                    if let &Yaml::String(ref value) = yaml_value {
-                        result.insert(key.as_str(), value.as_str());
+        &yaml_rust::Yaml::Hash(ref config) => {
+            for (yaml_key, yaml_value) in config {
+                if let &yaml_rust::Yaml::String(ref key) = yaml_key {
+                    if key == "boards" {
+                        boards = yaml_utils::read_map_from_string_to_string(yaml_value);
                     }
                 }
             }
         },
         _ => {
-
+            println!("no match");
         }
     }
 
-    result
+    Config {
+        boards: boards
+    }
 }

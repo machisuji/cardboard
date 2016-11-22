@@ -6,6 +6,9 @@ extern crate router;
 extern crate staticfile;
 extern crate clap;
 
+#[macro_use]
+extern crate lazy_static;
+
 use iron::prelude::*;
 
 use std::path::Path;
@@ -16,17 +19,17 @@ use staticfile::Static;
 
 use clap::{Arg, App};
 
+#[macro_use]
+mod macros;
+
 mod views;
+mod yaml_utils;
 mod configuration;
 
 fn main() {
     let matches = arg_matches();
 
     if check_data_directory() {
-        let config = configuration::load_config();
-
-        println!("config: {:?}", config);
-
         println!("Listening on port 9000 ...");
 
         if no_browser(& matches) {
