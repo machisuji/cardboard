@@ -1,7 +1,37 @@
+body {
+  background-color: #DDCFBF;
+}
+
 .card {
-  border: 1px solid black;
+  border: 1px solid #887766;
   margin: 5px;
   padding: 5px;
+  border-radius: 5px;
+  box-shadow: 1px 1px #887766;
+  background-color: #FFEEDD;
+}
+
+.card:hover {
+  box-shadow: 0px 0px 20px #887766;
+}
+
+.board-name {
+  margin-left: 5px;
+  font-style: italic;
+  color: #BBAA99;
+}
+
+.board {
+  border-radius: 5px;
+  box-shadow: 0px 0px 3px #887766;
+}
+
+.board:nth-child(even) {
+  background: #DDCCBB;
+}
+
+.board:nth-child(odd) {
+  background: #EEDDCC;
 }
 
 .pure-menu {
