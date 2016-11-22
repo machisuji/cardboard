@@ -42,8 +42,9 @@ fn render_response(title: String, output: &mut String) {
     output.push_str(& title);
     output.push_str("</title>");
 
-    output.push_str("<link rel=\"stylesheet\" href=\"http://yui.yahooapis.com/pure/0.6.0/pure-min.css\">");
+    output.push_str("<link rel=\"stylesheet\" type=\"text/css\" href=\"pure-0.6.0.min.css\">");
     output.push_str("<link rel=\"stylesheet\" type=\"text/css\" href=\"main.css\">");
+    output.push_str("<script src=\"jquery-3.1.1.min.js\"></script>");
     output.push_str("<script src=\"main.js\"></script>");
     output.push_str("</head><body>");
 
@@ -77,7 +78,7 @@ fn render_cards(output: &mut String) {
     let cards: Vec<Card> = load_cards();
 
     for (board, label) in config.boards {
-        output.push_str("<div class=\"board pure-u-1-3\" ondrop=\"drop(event)\" ondragover=\"allowDrop(event)\">");
+        output.push_str("<div class=\"board pure-u-1-3\" ondrop=\"Cardboard.drop(event)\" ondragover=\"Cardboard.allowDrop(event)\">");
         output.push_str("<h2 class=\"board-name\">");
         output.push_str(label.as_str());
         output.push_str("</h2>");
@@ -128,7 +129,7 @@ fn load_cards() -> Vec<Card> {
 
             output.push_str("<div id=\"card-");
             output.push_str(cards.len().to_string().as_str());
-            output.push_str("\" class=\"card\" draggable=\"true\" ondragstart=\"drag(event)\">");
+            output.push_str("\" class=\"card\" draggable=\"true\" ondragstart=\"Cardboard.drag(event)\">");
 
             markdown.push_str("\n\n");
             markdown.push_str(&markdown_body);

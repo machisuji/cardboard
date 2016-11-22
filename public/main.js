@@ -1,13 +1,25 @@
-function allowDrop(ev) {
-    ev.preventDefault();
-}
+(function (window, $) {
+  function CardboardApp() {
 
-function drag(ev) {
-    ev.dataTransfer.setData("text", ev.target.id);
-}
+  };
 
-function drop(ev) {
-    ev.preventDefault();
-    var data = ev.dataTransfer.getData("text");
-    ev.target.appendChild(document.getElementById(data));
-}
+  CardboardApp.prototype = {
+    constructor: CardboardApp,
+    allowDrop: function(event) {
+      if ($(event.target).hasClass("board")) {
+        event.preventDefault();
+      }
+    },
+    drag: function(event) {
+      event.dataTransfer.setData("text", event.target.id);
+    },
+    drop: function(event) {
+      var id = event.dataTransfer.getData("text");
+
+      event.preventDefault();
+      event.target.appendChild(document.getElementById(id));
+    }
+  }
+
+  window.Cardboard = new CardboardApp();
+})(window, jQuery);
