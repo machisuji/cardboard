@@ -71,8 +71,46 @@ fn file_handler() -> Static {
 fn check_data_directory() -> bool {
     let root = ".cardboard";
     let cards = root.to_string() + "/cards";
+    let default_data = fs::create_dir(root).is_ok();
 
-    (fs::create_dir(root).is_ok() && fs::create_dir(& cards).is_ok()) || Path::new(& cards).exists()
+    // populate newly created .cardboard directory with example data
+    if default_data {
+        println!("No data found. Initializing with example data.");
+        copy_directory("public/example", ".cardboard");
+    }
+
+    !default_data || Path::new(& cards).exists()
+}
+
+/**
+ * Copies the given directory to another location as far as possible.
+ * Meaning that it will continue even if single files or subdirectories
+ * cannot be copied.
+ */
+fn copy_directory(from_path: &str, to_path: &str) {
+    if let Ok(entries) = fs::read_dir(from_path) {
+        for entry in entries.into_iter().filter_map(|e| e.ok()) {
+            let path = entry.path();
+
+            if let Some(Some(file_name)) = path.file_name().map(|name| name.to_str()) {
+                if let Some(path_name) = path.to_str() {
+                    let new_path = format!("{}/{}", to_path, file_name);
+
+                    if path.is_dir() {
+                        if fs::create_dir(&new_path).is_ok() || Path::new(&new_path).exists() {
+                            copy_directory(path_name, &new_path);
+                        } else {
+                            println!("Failed to copy directory {} to {}", path_name, new_path);
+                        }
+                    } else {
+                        if fs::copy(&path, Path::new(&new_path)).is_err() {
+                            println!("Failed to copy {} to {}", path_name, new_path);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 fn no_browser(matches: &clap::ArgMatches) -> bool {
