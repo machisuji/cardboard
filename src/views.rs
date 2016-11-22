@@ -15,6 +15,9 @@ use std::fs;
 use std::io::prelude::*;
 use std::fs::File;
 
+use std::collections::HashMap;
+
+use yaml_utils;
 use configuration;
 use configuration::Config;
 
@@ -82,8 +85,6 @@ fn render_cards(output: &mut String) {
 
             if card.board == board {
                 output.push_str(card.html.as_str());
-            } else {
-                println!("{:?} does not match {:?}", card.board, board);
             }
         }
 
@@ -98,6 +99,7 @@ fn load_cards() -> Vec<Card> {
         let mut file = File::open(& card).ok().unwrap();
         let mut source = String::new();
         let mut output = String::new();
+        let meta: HashMap<String, String>;
 
         output.push_str("<div class=\"card\">");
 
@@ -129,15 +131,35 @@ fn load_cards() -> Vec<Card> {
             let result = html.render(&doc);
 
             output.push_str(result.to_str().unwrap());
+
+            meta = yaml_utils::read_yaml_object(meta_yaml, "meta")
+                .unwrap_or_else(|| HashMap::new());
         } else {
+            meta = HashMap::new();
+
             output.push_str("Could not read: ");
             output.push_str(card.to_str().unwrap());
         }
 
         output.push_str("</div>");
 
+        let card = Card {
+            board: meta.get("board").unwrap_or(&String::from("unassigned")).to_string(),
+            tags: meta
+                .get("tags")
+                .map(|tags|
+                    tags
+                    .split(",")
+                    .collect::<Vec<&str>>()
+                    .iter()
+                    .map(|s| s.trim().to_owned())
+                    .collect::<Vec<String>>()
+                )
+                .unwrap_or_else(|| vec![]),
+            html: output
+        };
 
-        cards.push(Card { board: String::from("foobar"), tags: vec![], html: output });
+        cards.push(card);
     }
 
     cards

@@ -71,9 +71,7 @@ fn read_config(doc: & yaml_rust::Yaml) -> Config {
                 }
             }
         },
-        _ => {
-            println!("no match");
-        }
+        _ => { }
     }
 
     Config {
