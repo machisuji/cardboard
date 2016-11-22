@@ -16,9 +16,9 @@ body {
 }
 
 .board-name {
-  margin-left: 5px;
-  font-style: italic;
+  margin-left: 1em;
   color: #BBAA99;
+  font-family: serif;
 }
 
 .board {
