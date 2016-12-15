@@ -11,32 +11,53 @@ use self::hyper::status::StatusCode;
 
 use self::params::{Params, Value};
 
+use git;
 use text_files;
 use configuration;
 
 pub fn update_card(request: &mut Request) -> IronResult<Response> {
     if let Ok(params) = request.get_ref::<Params>() {
         if let Some(&Value::String(ref board)) = params.find(&["card", "board"]) {
-            let config = configuration::config();
+            if let Some(&Value::String(ref file_name)) = params.find(&["card", "file_name"]) {
+                let config = configuration::config();
 
-            let update = |input: String, output: &mut String| {
-                for line in input.lines() {
-                    if line.starts_with("  board:") {
-                        output.push_str("  board: ");
-                        output.push_str(board);
-                    } else {
-                        output.push_str(line);
+                let update = |input: String, output: &mut String| {
+                    for line in input.lines() {
+                        if line.starts_with("  board:") {
+                            output.push_str("  board: ");
+                            output.push_str(board);
+                        } else {
+                            output.push_str(line);
+                        }
+
+                        output.push_str("\n");
                     }
+                };
 
-                    output.push_str("\n");
+                if text_files::update_text_file(& format!(".cardboard/cards/{}", &file_name), update).is_ok() {
+                    let repo = git::open(".cardboard");
+                    let sha = git::commit_file(
+                        &format!("cards/{}", &file_name),
+                        &format!("Changed {}'s board to {}", &file_name, &board),
+                        &repo
+                    );
+
+                    if sha.is_ok() {
+                        json_response(r##"{"message": "Card updated"}"##.to_string())
+                    } else {
+                        json_response_with_status(
+                            format!(r##"{{"message": "commit failed: {}"}}"##, sha.err().unwrap()),
+                            status::InternalServerError
+                        )
+                    }
+                } else {
+                    json_response_with_status(
+                        r##"{"message": "Failed to update card"}"##.to_string(),
+                        status::BadRequest)
                 }
-            };
-
-            if text_files::update_text_file(".cardboard/cards/boards.md", update).is_ok() {
-                json_response(r##"{"message": "Card updated"}"##.to_string())
             } else {
                 json_response_with_status(
-                    r##"{"message": "Failed to update card"}"##.to_string(),
+                    format!(r##"{{"message": "Cannot update: {:?}"}}"##, params).to_string(),
                     status::BadRequest)
             }
         } else {

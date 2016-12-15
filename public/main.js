@@ -16,8 +16,23 @@
     drop: function(event) {
       var id = event.dataTransfer.getData("text");
 
-      event.preventDefault();
-      event.target.appendChild(document.getElementById(id));
+      jQuery.post({
+        url: '/update_card',
+        data: {
+          card: {
+            file_name: id,
+            board: event.target.id
+          }
+        },
+        dataType: "json",
+        success: function() {
+          event.preventDefault();
+          event.target.appendChild(document.getElementById(id));
+        },
+        error: function(res) {
+          alert("Error: " + res.responseJSON.message);
+        }
+      });
     }
   }
 

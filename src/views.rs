@@ -79,7 +79,11 @@ fn render_cards(output: &mut String) {
     let cards: Vec<Card> = load_cards();
 
     for (board, label) in config.boards {
-        output.push_str("<div class=\"board pure-u-1-3\" ondrop=\"Cardboard.drop(event)\" ondragover=\"Cardboard.allowDrop(event)\">");
+        output.push_str(& format!(
+            "<div id=\"{}\" class=\"board pure-u-1-3\" ondrop=\"Cardboard.drop(event)\"
+                  ondragover=\"Cardboard.allowDrop(event)\">",
+            board
+        ));
         output.push_str("<h2 class=\"board-name\">");
         output.push_str(label.as_str());
         output.push_str("</h2>");
