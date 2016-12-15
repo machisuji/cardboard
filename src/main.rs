@@ -49,9 +49,9 @@ fn main() {
         if state == "<new>" {
             let sha = git::initial_commit(".", "initial commit", &repo);
 
-            println!("Data at {:?}", sha);
+            println!("Initialized data at {:?}", sha);
         } else {
-            println!("Data at {}", state);
+            println!("Existing data at {}", state);
         }
 
         println!("Listening on port 9000 ...");
