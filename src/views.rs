@@ -23,6 +23,7 @@ use configuration::Config;
 
 #[derive(Debug, Clone)]
 pub struct Card {
+    file_name: String,
     title: String,
     board: String,
     tags: Vec<String>,
@@ -104,6 +105,7 @@ fn load_cards() -> Vec<Card> {
         let mut output = String::new();
         let meta: LinkedHashMap<String, String>;
         let mut card_title = String::from("");
+        let file_name: String = card.file_name().unwrap().to_str().unwrap().to_string();
 
         if file.read_to_string(&mut source).is_ok() {
             let meta_yaml: String = source
@@ -127,8 +129,8 @@ fn load_cards() -> Vec<Card> {
 
             card_title = markdown[1..].to_string();
 
-            output.push_str("<div id=\"card-");
-            output.push_str(cards.len().to_string().as_str());
+            output.push_str("<div id=\"");
+            output.push_str(&file_name);
             output.push_str("\" class=\"card\" draggable=\"true\" ondragstart=\"Cardboard.drag(event)\">");
 
             markdown.push_str("\n\n");
@@ -152,6 +154,7 @@ fn load_cards() -> Vec<Card> {
         output.push_str("</div>");
 
         let card = Card {
+            file_name: file_name,
             title: card_title,
             board: meta.get("board").unwrap_or(&String::from("unassigned")).to_string(),
             tags: meta

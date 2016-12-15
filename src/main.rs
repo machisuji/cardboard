@@ -23,14 +23,37 @@ use clap::{Arg, App};
 #[macro_use]
 mod macros;
 
+mod git;
+mod api;
 mod views;
 mod yaml_utils;
+mod text_files;
 mod configuration;
 
 fn main() {
     let matches = arg_matches();
 
     if check_data_directory() {
+        let repo = git::open_or_init(".cardboard");
+        let state = repo.head().ok()
+            .and_then( |state| {
+                let msg = state.target()
+                    .and_then(|oid| repo.find_commit(oid).ok())
+                    .and_then(|mut commit| commit.summary().map(|s| s.to_string()))
+                    .unwrap_or(String::from("no summary"));
+
+                state.shorthand().map(|s| format!("{} ({})", s.to_string(), msg))
+            })
+            .unwrap_or(String::from("<new>"));
+
+        if state == "<new>" {
+            let sha = git::initial_commit(".", "initial commit", &repo);
+
+            println!("Data at {:?}", sha);
+        } else {
+            println!("Data at {}", state);
+        }
+
         println!("Listening on port 9000 ...");
 
         if no_browser(& matches) {
@@ -60,6 +83,8 @@ fn make_router() -> Router {
 
     router.get("/", views::index, "index");
     router.get("*", file_handler(), "files");
+
+    router.post("/update_card", api::update_card, "update_card");
 
     router
 }
