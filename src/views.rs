@@ -37,6 +37,7 @@ pub struct Card {
     title: String,
     board: String,
     tags: Vec<String>,
+    markdown: String,
     html: String
 }
 
@@ -77,6 +78,7 @@ impl ToJson for Card {
         m.insert("title".to_string(), self.title.to_json());
         m.insert("board".to_string(), self.board.to_json());
         m.insert("tags".to_string(), self.tags.to_json());
+        m.insert("markdown".to_string(), self.markdown.to_json());
         m.insert("html".to_string(), self.html.to_json());
 
         m.to_json()
@@ -95,6 +97,7 @@ impl Card {
             title: self.title.to_string(),
             board: self.board.to_string(),
             tags: tags,
+            markdown: self.markdown.to_string(),
             html: self.html.to_string()
         }
     }
@@ -138,6 +141,7 @@ fn load_cards() -> Vec<Card> {
     for card in fs::read_dir(".cardboard/cards").ok().unwrap().flat_map(|dir| dir.map(|e| e.path())) {
         let mut file = File::open(& card).ok().unwrap();
         let mut source = String::new();
+        let mut markdown = String::new();
         let mut output = String::new();
         let meta: LinkedHashMap<String, String>;
         let mut card_title = String::from("");
@@ -146,26 +150,26 @@ fn load_cards() -> Vec<Card> {
         if file.read_to_string(&mut source).is_ok() {
             let meta_yaml: String = source
                 .lines()
-                .skip_while(|line| !line.starts_with("meta:"))
                 .take_while(|line| line.starts_with("meta:") || line.starts_with(" "))
                 .collect::<Vec<&str>>()
                 .join("\n");
 
-            let mut markdown: String = source.lines().take(1).collect::<Vec<&str>>().join("\n");
+            markdown = String::new();
+
             let markdown_body: String = source
                 .lines()
-                .skip_while( |line|
-                    *line == markdown ||         // skip markdown title
-                    line.starts_with("meta:") || // skip meta yaml
-                    line.starts_with(" ") ||     // more meta yaml
-                    *line == ""                  // possible empty lines
-                )
+                .skip_while( |line| {
+                    let skip = configuration::is_meta_yaml(*line);
+
+                    if skip == false { // first line if content: # Card Title
+                        card_title = line[1..].to_string();
+                    }
+
+                    skip
+                })
                 .collect::<Vec<&str>>()
                 .join("\n");
 
-            card_title = markdown[1..].to_string();
-
-            markdown.push_str("\n\n");
             markdown.push_str(&markdown_body);
 
             let doc = Markdown::new(&markdown);
@@ -198,6 +202,7 @@ fn load_cards() -> Vec<Card> {
                     .collect::<Vec<String>>()
                 )
                 .unwrap_or_else(|| vec![]),
+            markdown: markdown,
             html: output
         };
 

@@ -27,6 +27,20 @@ pub fn config() -> Config {
     config.clone()
 }
 
+pub fn is_meta_yaml(line: &str) -> bool {
+    line.starts_with("meta:") || // skip meta yamls
+        line.starts_with(" ") || // more meta yaml
+        line == ""               // possible empty lines
+}
+
+pub fn read_meta_yaml(source: String) -> String {
+    source
+        .lines()
+        .take_while(|line| line.starts_with("meta:") || line.starts_with(" "))
+        .collect::<Vec<&str>>()
+        .join("\n")
+}
+
 fn get_config() -> Config {
     let config: Option<Config> = load_config();
 

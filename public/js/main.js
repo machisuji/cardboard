@@ -33,6 +33,41 @@
           alert("Error: " + res.responseJSON.message);
         }
       });
+    },
+    updateCard: function(a) {
+      var self = this;
+      var card = jQuery(a).closest(".card");
+
+      jQuery.ajax({
+        url: "/update_card",
+        type: "POST",
+        dataType: "json",
+        data : card.find("form").serialize(),
+        success : function(result) {
+          location.reload();
+        },
+        error: function(res) {
+          alert("Error: " + res.responseJSON.message);
+        }
+      });
+    },
+    editCard: function(a) {
+      var card = jQuery(a).closest(".card");
+
+      this.toggleUpdateForm(card);
+
+      if (card.is(":visible")) {
+        card.find("textarea").focus();
+      }
+    },
+    cancelEdit: function(a) {
+      var card = jQuery(a).closest(".card");
+
+      this.toggleUpdateForm(card);
+    },
+    toggleUpdateForm: function(card) {
+      card.find(".content").toggle();
+      card.find(".form").toggle();
     }
   }
 

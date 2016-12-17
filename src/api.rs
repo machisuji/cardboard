@@ -13,11 +13,12 @@ use self::params::{Params, Value};
 
 use git;
 use text_files;
+use configuration;
 
 pub fn update_card(request: &mut Request) -> IronResult<Response> {
     if let Ok(params) = request.get_ref::<Params>() {
-        if let Some(&Value::String(ref board)) = params.find(&["card", "board"]) {
-            if let Some(&Value::String(ref file_name)) = params.find(&["card", "file_name"]) {
+        if let Some(&Value::String(ref file_name)) = params.find(&["card", "file_name"]) {
+            if let Some(&Value::String(ref board)) = params.find(&["card", "board"]) {
                 let update = |input: String, output: &mut String| {
                     for line in input.lines() {
                         if line.starts_with("  board:") {
@@ -36,6 +37,37 @@ pub fn update_card(request: &mut Request) -> IronResult<Response> {
                     let sha = git::commit_file(
                         &format!("cards/{}", &file_name),
                         &format!("Moved {} to {}", &file_name, &board),
+                        &repo
+                    );
+
+                    if sha.is_ok() {
+                        json_response(r##"{"message": "Card updated"}"##.to_string())
+                    } else {
+                        json_response_with_status(
+                            format!(r##"{{"message": "commit failed: {}"}}"##, sha.err().unwrap()),
+                            status::InternalServerError
+                        )
+                    }
+                } else {
+                    json_response_with_status(
+                        r##"{"message": "Failed to update card"}"##.to_string(),
+                        status::BadRequest)
+                }
+            } else if let Some(&Value::String(ref content)) = params.find(&["card", "content"]) {
+                let update = |input: String, output: &mut String| {
+                    let meta = configuration::read_meta_yaml(input);
+
+                    output.push_str(&meta);
+                    output.push_str("\n\n");
+                    output.push_str(content);
+                    output.push_str("\n");
+                };
+
+                if text_files::update_text_file(& format!(".cardboard/cards/{}", &file_name), update).is_ok() {
+                    let repo = git::open(".cardboard");
+                    let sha = git::commit_file(
+                        &format!("cards/{}", &file_name),
+                        &format!("Updated content of {}", &file_name),
                         &repo
                     );
 
