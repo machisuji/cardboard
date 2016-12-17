@@ -20,6 +20,7 @@ lazy_static = "0.2.2"
 linked-hash-map = "0.3.0"
 params = "0.5.1"
 git2 = "0.6.1"
+rustc-serialize = "0.3.21"
 
 [dependencies.yaml-rust]
 version = "0.3.4"
@@ -28,3 +29,7 @@ features = ["preserve_order"]
 [dependencies.hyper]
 version = "0.9.12"
 default-features = false
+
+[dependencies.handlebars-iron]
+version = "0.20.0"
+features = ["watch"]

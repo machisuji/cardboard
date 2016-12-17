@@ -1,12 +1,11 @@
 extern crate iron;
 extern crate hoedown;
 extern crate hyper;
+extern crate handlebars_iron;
+extern crate rustc_serialize;
 
 use self::iron::prelude::*;
 use self::iron::status;
-
-use self::hyper::header::{ContentType};
-use self::hyper::mime::{Mime, TopLevel, SubLevel};
 
 use self::hoedown::{Markdown, Render};
 use self::hoedown::renderer::html::{Flags, Html};
@@ -21,6 +20,17 @@ use yaml_utils;
 use configuration;
 use configuration::Config;
 
+use self::handlebars_iron::Template;
+use self::rustc_serialize::json::{ToJson, Json};
+use std::collections::BTreeMap;
+
+#[derive(Debug, Clone)]
+pub struct Board {
+    id: String,
+    label: String,
+    cards: Vec<Card>
+}
+
 #[derive(Debug, Clone)]
 pub struct Card {
     file_name: String,
@@ -30,74 +40,96 @@ pub struct Card {
     html: String
 }
 
+#[derive(Debug, Clone)]
+pub struct Index {
+    title: String,
+    boards: Vec<Board>
+}
+
+impl ToJson for Index {
+    fn to_json(&self) -> Json {
+        let mut m: BTreeMap<String, Json> = BTreeMap::new();
+
+        m.insert("title".to_string(), self.title.to_json());
+        m.insert("boards".to_string(), self.boards.to_json());
+
+        m.to_json()
+    }
+}
+
+impl ToJson for Board {
+    fn to_json(&self) -> Json {
+        let mut m: BTreeMap<String, Json> = BTreeMap::new();
+
+        m.insert("id".to_string(), self.id.to_json());
+        m.insert("label".to_string(), self.label.to_json());
+        m.insert("cards".to_string(), self.cards.to_json());
+
+        m.to_json()
+    }
+}
+
+impl ToJson for Card {
+    fn to_json(&self) -> Json {
+        let mut m: BTreeMap<String, Json> = BTreeMap::new();
+
+        m.insert("file_name".to_string(), self.file_name.to_json());
+        m.insert("title".to_string(), self.title.to_json());
+        m.insert("board".to_string(), self.board.to_json());
+        m.insert("tags".to_string(), self.tags.to_json());
+        m.insert("html".to_string(), self.html.to_json());
+
+        m.to_json()
+    }
+}
+
+impl Card {
+    fn on_stack(&self) -> Card {
+        let tags: Vec<String> = self.tags
+            .iter()
+            .map(|tag| tag.to_string())
+            .collect();
+
+        Card {
+            file_name: self.file_name.to_string(),
+            title: self.title.to_string(),
+            board: self.board.to_string(),
+            tags: tags,
+            html: self.html.to_string()
+        }
+    }
+}
+
 pub fn index(_: &mut Request) -> IronResult<Response> {
-    let mut html = String::with_capacity(4096);
+    let mut resp = Response::new();
 
-    render_response(String::from("Cardboard - Index"), &mut html);
-
-    html_response(html)
-}
-
-fn render_response(title: String, output: &mut String) {
-    output.push_str("<html><head><title>");
-    output.push_str(& title);
-    output.push_str("</title>");
-
-    output.push_str("<link rel=\"stylesheet\" type=\"text/css\" href=\"pure-0.6.0.min.css\">");
-    output.push_str("<link rel=\"stylesheet\" type=\"text/css\" href=\"main.css\">");
-    output.push_str("<script src=\"jquery-3.1.1.min.js\"></script>");
-    output.push_str("<script src=\"main.js\"></script>");
-    output.push_str("</head><body>");
-
-    render_menu(output);
-    render_boards(output);
-
-    output.push_str("</body>");
-}
-
-fn render_menu(output: &mut String) {
-    output.push_str("
-        <div class=\"pure-menu pure-menu-horizontal\">
-            <a href=\"/\" class=\"pure-menu-heading pure-menu-link\">cardboard</a>
-            <ul class=\"pure-menu-list\">
-                <li class=\"pure-menu-item\"><a href=\"#\" class=\"pure-menu-link\">Boards</a></li>
-            </ul>
-        </div>
-    ");
-}
-
-fn render_boards(output: &mut String) {
-    output.push_str("<div class=\"pure-g\">");
-
-    render_cards(output);
-
-    output.push_str("</div>");
-}
-
-fn render_cards(output: &mut String) {
     let config: Config = configuration::config();
     let cards: Vec<Card> = load_cards();
 
-    for (board, label) in config.boards {
-        output.push_str(& format!(
-            "<div id=\"{}\" class=\"board pure-u-1-3\" ondrop=\"Cardboard.drop(event)\"
-                  ondragover=\"Cardboard.allowDrop(event)\">",
-            board
-        ));
-        output.push_str("<h2 class=\"board-name\">");
-        output.push_str(label.as_str());
-        output.push_str("</h2>");
+    let boards: Vec<Board> = config.boards.iter().map(|e| {
+        let (id, label) = e;
 
-        for i in 0..(cards.len() - 1) {
-            let ref card = cards[i];
+        let board_cards: Vec<Card> = cards
+            .iter()
+            .filter(|card| &card.board == id)
+            .map(|card| card.on_stack())
+            .collect();
 
-            if card.board == board {
-                output.push_str(card.html.as_str());
-            }
+        Board {
+            id: id.to_string(),
+            label: label.to_string(),
+            cards: board_cards
         }
+    }).collect();
 
-        output.push_str("</div>");
-    }
+    let data = Index {
+        title: String::from("Cardboard - Index"),
+        boards: boards
+    };
+
+    resp.set_mut(Template::new("index", data)).set_mut(status::Ok);
+
+    Ok(resp)
 }
 
 fn load_cards() -> Vec<Card> {
@@ -133,10 +165,6 @@ fn load_cards() -> Vec<Card> {
 
             card_title = markdown[1..].to_string();
 
-            output.push_str("<div id=\"");
-            output.push_str(&file_name);
-            output.push_str("\" class=\"card\" draggable=\"true\" ondragstart=\"Cardboard.drag(event)\">");
-
             markdown.push_str("\n\n");
             markdown.push_str(&markdown_body);
 
@@ -154,8 +182,6 @@ fn load_cards() -> Vec<Card> {
             output.push_str("Could not read: ");
             output.push_str(card.to_str().unwrap());
         }
-
-        output.push_str("</div>");
 
         let card = Card {
             file_name: file_name,
@@ -179,12 +205,4 @@ fn load_cards() -> Vec<Card> {
     }
 
     cards
-}
-
-fn html_response(content: String) -> IronResult<Response> {
-    let mut response = Response::with((status::Ok, content));
-
-    response.headers.set(ContentType(Mime(TopLevel::Text, SubLevel::Html, vec![])));
-
-    Ok(response)
 }

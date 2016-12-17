@@ -13,14 +13,11 @@ use self::params::{Params, Value};
 
 use git;
 use text_files;
-use configuration;
 
 pub fn update_card(request: &mut Request) -> IronResult<Response> {
     if let Ok(params) = request.get_ref::<Params>() {
         if let Some(&Value::String(ref board)) = params.find(&["card", "board"]) {
             if let Some(&Value::String(ref file_name)) = params.find(&["card", "file_name"]) {
-                let config = configuration::config();
-
                 let update = |input: String, output: &mut String| {
                     for line in input.lines() {
                         if line.starts_with("  board:") {
@@ -38,7 +35,7 @@ pub fn update_card(request: &mut Request) -> IronResult<Response> {
                     let repo = git::open(".cardboard");
                     let sha = git::commit_file(
                         &format!("cards/{}", &file_name),
-                        &format!("Changed {}'s board to {}", &file_name, &board),
+                        &format!("Moved {} to {}", &file_name, &board),
                         &repo
                     );
 

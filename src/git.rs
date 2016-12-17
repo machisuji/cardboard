@@ -28,11 +28,10 @@ pub fn commit_file(file_name: &str, message: &str, repo: &Repository) -> Result<
     let author = Signature::now("Cardboard", "cardboard@goldsaucer.co.uk").unwrap();
     let oid = repo.head().ok().and_then(|state| state.target()).unwrap();
     let parent = repo.find_commit(oid).unwrap();
-    let tree = parent.tree().unwrap();
 
     let mut index = repo.index().unwrap();
 
-    index.add_path(Path::new(file_name)); // @TODO error checking
+    index.add_path(Path::new(file_name))?;
 
     let index_oid = index.write_tree_to(&repo).unwrap();
     let tree = repo.find_tree(index_oid).unwrap();
@@ -50,7 +49,7 @@ pub fn initial_commit(path_name: &str, message: &str, repo: &Repository) -> Resu
     let author = Signature::now("Cardboard", "cardboard@goldsaucer.co.uk").unwrap();
     let mut index = repo.index().unwrap();
 
-    index.add_all([path_name].iter(), IndexAddOption::empty(), None); // @TODO error checking
+    index.add_all([path_name].iter(), IndexAddOption::empty(), None)?;
 
     let index_oid = index.write_tree_to(&repo).unwrap();
     let tree = repo.find_tree(index_oid).unwrap();

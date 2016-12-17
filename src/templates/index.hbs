@@ -1,0 +1,35 @@
+<html>
+  <head>
+    <title>{{title}}</title>
+
+    <link rel="stylesheet" type="text/css" href="pure-0.6.0.min.css">
+    <link rel="stylesheet" type="text/css" href="main.css">
+
+    <script src="jquery-3.1.1.min.js"></script>
+    <script src="main.js"></script>
+  </head>
+  <body>
+    <div class="pure-menu pure-menu-horizontal">
+        <a href="/" class="pure-menu-heading pure-menu-link">cardboard</a>
+        <ul class="pure-menu-list">
+            <li class="pure-menu-item">
+              <a href="#" class="pure-menu-link">Boards</a>
+            </li>
+        </ul>
+    </div>
+    <div class="pure-g">
+      {{#each boards}}
+        <div id="{{id}}" class="board pure-u-1-3" ondrop="Cardboard.drop(event)"
+             ondragover="Cardboard.allowDrop(event)"
+        >
+          <h2 class="board-name">{{label}}</h2>
+          {{#each cards}}
+            <div id="{{id}}" class="card" draggable="true" ondragstart="Cardboard.drag(event)">
+              {{{html}}}
+            </div>
+          {{/each}}
+        </div>
+      {{/each}}
+    </div>
+  </body>
+</html>

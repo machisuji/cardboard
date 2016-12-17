@@ -6,6 +6,7 @@ extern crate router;
 extern crate staticfile;
 extern crate clap;
 extern crate linked_hash_map;
+extern crate handlebars_iron;
 
 #[macro_use]
 extern crate lazy_static;
@@ -19,6 +20,9 @@ use router::Router;
 use staticfile::Static;
 
 use clap::{Arg, App};
+
+use handlebars_iron::{HandlebarsEngine, DirectorySource, Watchable};
+use std::sync::Arc;
 
 #[macro_use]
 mod macros;
@@ -60,7 +64,7 @@ fn main() {
             println!("Open http://localhost:9000 to view your project")
         }
 
-        Iron::new(make_router()).http("localhost:9000").unwrap();
+        start_server();
     } else {
         println!("Failed to create data directory");
     }
@@ -87,6 +91,26 @@ fn make_router() -> Router {
     router.post("/update_card", api::update_card, "update_card");
 
     router
+}
+
+fn start_server() {
+    let mut hbse = HandlebarsEngine::new();
+
+    hbse.add(Box::new(DirectorySource::new("./src/templates/", ".hbs")));
+
+    // load templates from all registered sources
+    if let Err(r) = hbse.reload() {
+        panic!("{}", r);
+    }
+
+    let router = make_router();
+    let mut chain = Chain::new(router);
+    let hbse_ref = Arc::new(hbse);
+
+    hbse_ref.watch("./src/templates/");
+    chain.link_after(hbse_ref);
+
+    Iron::new(chain).http("localhost:9000").unwrap();
 }
 
 fn file_handler() -> Static {
