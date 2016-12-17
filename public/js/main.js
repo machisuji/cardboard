@@ -56,7 +56,7 @@
 
       this.toggleUpdateForm(card);
 
-      if (card.is(":visible")) {
+      if (!this.isCardContentVisible(card)) {
         card.find("textarea").focus();
       }
     },
@@ -68,6 +68,15 @@
     toggleUpdateForm: function(card) {
       card.find(".content").toggle();
       card.find(".form").toggle();
+
+      if (this.isCardContentVisible(card)) {
+        card.attr("draggable", "true");
+      } else {
+        card.removeAttr("draggable");
+      }
+    },
+    isCardContentVisible: function(card) {
+      return card.find(".content").is(":visible");
     }
   }
 
