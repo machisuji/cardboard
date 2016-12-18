@@ -15,8 +15,14 @@ body {
   box-shadow: 0px 0px 20px #887766;
 }
 
+.card .content {
+  font-size: smaller;
+}
+
 .card h1:first-of-type {
   margin-top: 0px;
+  font-size: medium;
+  color: #CCAA88;
 }
 
 .card .toolbar {
