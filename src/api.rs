@@ -124,9 +124,10 @@ pub fn create_card(request: &mut Request) -> IronResult<Response> {
                 let header: String = content.lines().next().unwrap_or("# New card").to_string();
                 let title: String = header[1..].trim().to_lowercase();
                 let name: String = trim.replace_all(&regex.replace_all(&title, "_"), "");
-                let file_name: &str = &format!("{}.md", name);
+                let file_name: String = format!("{}.md", name);
+                let path: String = format!(".cardboard/cards/{}", file_name);
 
-                if text_files::create_text_file(& format!(".cardboard/cards/{}", &file_name), output).is_ok() {
+                if text_files::create_text_file(&path, output).is_ok() {
                     let repo = git::open(".cardboard");
                     let sha = git::commit_file(
                         &format!("cards/{}", &file_name),
