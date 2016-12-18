@@ -14,3 +14,10 @@ cargo build --release
 ```
 
 Whereupon the executable will be created at `target/release/cardboard`.
+
+### Building on Windows
+
+On Windows the build has the following prerequisites:
+
+* [OpenSSL](https://github.com/sfackler/rust-openssl#windows)
+* [cmake](https://cmake.org/download/)
