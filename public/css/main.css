@@ -81,6 +81,10 @@ body {
   visibility: visible;
 }
 
+.card ul.toolbar li a {
+  color: #887766;
+}
+
 .card textarea {
   margin-top: 1em;
   width: 100%;
