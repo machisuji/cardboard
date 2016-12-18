@@ -11,8 +11,30 @@ body {
   background-color: #FFEEDD;
 }
 
-.card:hover {
+.card.active {
   box-shadow: 0px 0px 20px #887766;
+}
+
+.card h1:first-of-type {
+  margin-top: 0px;
+}
+
+.card .toolbar {
+  cursor: move; /* fallback if grab cursor is unsupported */
+  cursor: grab;
+  cursor: -moz-grab;
+  cursor: -webkit-grab;
+}
+
+.card .toolbar:active {
+  cursor: grabbing;
+  cursor: -moz-grabbing;
+  cursor: -webkit-grabbing;
+}
+
+.card .toolbar:hover {
+  background-color: #E6D6C6;
+  border-radius: 5px 5px 0px 0px;
 }
 
 .board-name {

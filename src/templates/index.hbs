@@ -25,7 +25,7 @@
         >
           <h2 class="board-name">{{label}}</h2>
           {{#each cards}}
-            <div id="{{file_name}}" class="card" draggable="true" ondragstart="Cardboard.drag(event)">
+            <div id="{{file_name}}" class="card" draggable="false" ondragstart="Cardboard.drag(event)">
               <ul class="toolbar">
                 <li>
                   <a href="#" onclick="Cardboard.editCard(this); return false;"

@@ -15,24 +15,28 @@
     },
     drop: function(event) {
       var id = event.dataTransfer.getData("text");
+      var card = jQuery(document.getElementById(id));
+      var board = jQuery(event.target);
 
-      jQuery.post({
-        url: '/update_card',
-        data: {
-          card: {
-            file_name: id,
-            board: event.target.id
+      if (card.parent().attr("id") !== board.attr("id")) {
+        jQuery.post({
+          url: '/update_card',
+          data: {
+            card: {
+              file_name: id,
+              board: event.target.id
+            }
+          },
+          dataType: "json",
+          success: function() {
+            event.preventDefault();
+            event.target.appendChild(document.getElementById(id));
+          },
+          error: function(res) {
+            alert("Error: " + res.responseJSON.message);
           }
-        },
-        dataType: "json",
-        success: function() {
-          event.preventDefault();
-          event.target.appendChild(document.getElementById(id));
-        },
-        error: function(res) {
-          alert("Error: " + res.responseJSON.message);
-        }
-      });
+        });
+      }
     },
     updateCard: function(a) {
       var self = this;
@@ -81,4 +85,18 @@
   }
 
   window.Cardboard = new CardboardApp();
+
+  jQuery(document).ready(function() {
+    jQuery(".card .toolbar")
+      .mouseenter(function() {
+        jQuery(this).closest(".card")
+          .attr("draggable", "true")
+          .addClass("active");
+      })
+      .mouseleave(function() {
+        jQuery(this).closest(".card")
+          .attr("draggable", "false")
+          .removeClass("active");
+      });
+  });
 })(window, jQuery);
