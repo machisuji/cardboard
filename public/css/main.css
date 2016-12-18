@@ -96,3 +96,15 @@ body {
 .card .form .buttons a {
   margin-left: 0.5em;
 }
+
+a.new-card {
+  display: block;
+  color: #887766;
+  margin-top: 1em;
+  margin-left: 10px;
+  text-decoration: none;
+}
+
+a.new-card:hover {
+  text-decoration: underline;
+}

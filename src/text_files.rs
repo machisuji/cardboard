@@ -18,3 +18,11 @@ pub fn update_text_file<F>(file_name: &str, mut f: F) -> Result<()> where F: FnM
 
     Ok(())
 }
+
+pub fn create_text_file(file_name: &str, content: String) -> Result<()> {
+    let mut dst = try!(File::create(file_name));
+
+    try!(dst.write_all(content.as_bytes()));
+
+    Ok(())
+}

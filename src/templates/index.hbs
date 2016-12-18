@@ -60,6 +60,31 @@
               </div>
             </div>
           {{/each}}
+          <a href="#" onclick="Cardboard.newCard(this); return false;" class="new-card">
+            Add a card ...
+          </a>
+          <div class="card -new" style="display: none;">
+            <div class="form">
+              <form action="/create_card" method="post">
+                <textarea name="card[content]"># New Card</textarea>
+                <input name="card[board]" type="hidden" value="{{id}}"/>
+                <div class="buttons">
+                  <a href="#"
+                     onclick="Cardboard.cancelCreate(this); return false;"
+                     class="pure-button"
+                  >
+                    Cancel
+                  </a>
+                  <a href="#"
+                     onclick="Cardboard.createCard(this); return false;"
+                     class="pure-button pure-button-primary"
+                  >
+                    Create
+                  </a>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
       {{/each}}
     </div>

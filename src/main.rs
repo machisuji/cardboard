@@ -89,6 +89,7 @@ fn make_router() -> Router {
     router.get("*", file_handler(), "files");
 
     router.post("/update_card", api::update_card, "update_card");
+    router.post("/create_card", api::create_card, "create_card");
 
     router
 }

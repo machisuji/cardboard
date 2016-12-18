@@ -21,6 +21,7 @@ linked-hash-map = "0.3.0"
 params = "0.5.1"
 git2 = "0.6.1"
 rustc-serialize = "0.3.21"
+regex = "0.1.80"
 
 [dependencies.yaml-rust]
 version = "0.3.4"

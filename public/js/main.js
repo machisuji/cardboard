@@ -81,6 +81,39 @@
     },
     isCardContentVisible: function(card) {
       return card.find(".content").is(":visible");
+    },
+    newCard: function(a) {
+      var link = jQuery(a);
+      var form = link.parent().find(".card.-new");
+
+      link.hide();
+      form.show();
+
+      form.find("textarea").focus();
+    },
+    cancelCreate: function(a) {
+      var card = jQuery(a).closest(".board");
+      var newLink = card.find("a.new-card");
+      var form = card.find(".card.-new");
+
+      form.hide();
+      newLink.show();
+    },
+    createCard: function(a) {
+      var form = jQuery(a).closest("form");
+
+      jQuery.ajax({
+        url: "/create_card",
+        type: "POST",
+        dataType: "json",
+        data : form.serialize(),
+        success : function(result) {
+          location.reload();
+        },
+        error: function(res) {
+          alert("Error: " + res.responseJSON.message);
+        }
+      });
     }
   }
 
