@@ -5,7 +5,7 @@
 `cardboard` is a decentralized, kanban-style collaboration tool which lets you organize tasks
 into customizable cards based on plain, versioned text files.
 
-![Image of Cardboard](doc/images/yaktocat.png)
+![Image of Cardboard](https://github.com/machisuji/cardboard/raw/master/doc/cardboard.png)
 
 ## Usage
 
