@@ -5,6 +5,8 @@
 `cardboard` is a decentralized, kanban-style collaboration tool which lets you organize tasks
 into customizable cards based on plain, versioned text files.
 
+![Image of Cardboard](doc/images/yaktocat.png)
+
 ## Usage
 
 When running `cardboard` for the first time it will initialize a data
@@ -31,7 +33,13 @@ cd .cardboard
 git add remote origin git@github.com:machisuji/cardboard-example.git
 ```
 
-## Build
+## Development
+
+1. Install `rust` including `cargo` as described [here](https://www.rust-lang.org/en-US/install.html).
+2. Run it using `cargo run`. You can suppress the opening of a browser through
+`cargo run -- -q`.
+
+### Build
 
 Built using cargo.
 
@@ -40,12 +48,6 @@ cargo build --release
 ```
 
 Whereupon the executable will be created at `target/release/cardboard`.
-
-## Development
-
-1. Install `rust` including `cargo` as described [here](https://www.rust-lang.org/en-US/install.html).
-2. Run it using `cargo run`. You can suppress the opening of a browser through
-`cargo run -- -q`.
 
 ## DISCLAIMER
 
