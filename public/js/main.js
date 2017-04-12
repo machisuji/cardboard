@@ -30,7 +30,7 @@
           dataType: "json",
           success: function() {
             event.preventDefault();
-            event.target.appendChild(document.getElementById(id));
+            card.insertBefore(board.find("a.new-card"));
           },
           error: function(res) {
             alert("Error: " + res.responseJSON.message);

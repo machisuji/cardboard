@@ -6,7 +6,6 @@ body {
   border: 1px solid #887766;
   margin: 5px;
   padding: 5px;
-  border-radius: 5px;
   box-shadow: 1px 1px #887766;
   background-color: #FFEEDD;
 }
@@ -15,8 +14,14 @@ body {
   box-shadow: 0px 0px 20px #887766;
 }
 
+.card .content {
+  font-size: smaller;
+}
+
 .card h1:first-of-type {
   margin-top: 0px;
+  font-size: medium;
+  color: #CCAA88;
 }
 
 .card .toolbar {
@@ -34,7 +39,6 @@ body {
 
 .card .toolbar:hover {
   background-color: #E6D6C6;
-  border-radius: 5px 5px 0px 0px;
 }
 
 .board-name {
@@ -44,7 +48,6 @@ body {
 }
 
 .board {
-  border-radius: 5px;
   box-shadow: 0px 0px 3px #887766;
   padding-bottom: 50px;
 }
@@ -79,6 +82,10 @@ body {
 
 .card:hover ul.toolbar li {
   visibility: visible;
+}
+
+.card ul.toolbar li a {
+  color: #887766;
 }
 
 .card textarea {
